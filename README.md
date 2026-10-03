@@ -1,5 +1,8 @@
 # ToolSeeds
-Programming tools can now be transmitted in the form of prompts instead of finished software. Here's a library of such tool seeds.
+
+Programming tools can be transmitted as prompts instead of finished software. ToolSeeds is a library of prompts that help AI coding assistants create or adapt programming tools.
+
+A tool seed describes a tool's purpose and expected behavior so an assistant can build it in the context of your project. Unlike finished software, a seed can be adapted to your language, framework, and constraints.
 
 ## Tools
 
@@ -7,7 +10,7 @@ Programming tools can now be transmitted in the form of prompts instead of finis
 
 ## Using a tool
 
-Open a coding agent in the project you want the tool for, then paste in the tool's `prompt.md`. The agent builds the tool against your code.
+Open a coding agent in the project you want the tool for, then paste in the tool's `prompt.md` along with any relevant project context or constraints. The agent builds the tool against your code. Review the result and run the project's tests.
 
 ## Creating a new tool
 
