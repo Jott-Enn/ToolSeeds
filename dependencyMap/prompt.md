@@ -10,7 +10,9 @@ DATA
   identifier through it, following imports, re-exports and aliases.
 - One node per building block: a top-level function (including a constant
   holding a function), a class or struct, or a type (interface, alias, enum,
-  trait). Id is path#name.
+  trait). Id is path#name, where name is the compiler's fully qualified
+  symbol (e.g. `ns.Outer.Inner`), so same-named declarations in different
+  scopes of one file stay apart.
 - Nested things belong to their block: a method's dependencies are its
   class's, and a closure's are its function's. A call on an instance
   (`board.move()`) resolves to the instance's type.

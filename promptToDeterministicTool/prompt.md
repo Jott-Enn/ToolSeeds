@@ -13,7 +13,9 @@ SHAPE
   core beside it: sources at one commit in, model out. No file system, git,
   network, clock or randomness in the core.
 - Outputs:
-  - results/<name>.json: the model, with keys and arrays sorted and ids stable
+  - results/<name>.json: the model, with keys sorted, unordered collections
+    sorted, sequences (layers, steps, commits) kept in their defined order,
+    and ids stable
   - results/<name>.html: one self-contained page, with libraries inlined from
     the local dependency tree, not a CDN
   - a `--markdown` (or similar) flag that prints the summary the seed's

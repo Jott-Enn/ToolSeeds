@@ -3,7 +3,7 @@ Prompt for a CI/CD pipeline visualizer:
 Build me an interactive anatomy of this project's CI/CD pipeline, published as an artifact.
 
 DATA
-- Read the workflow definitions (for GitHub Actions, .github/workflows/*.yml; adapt
+- Read the workflow definitions (for GitHub Actions, .github/workflows/*.yml and *.yaml; adapt
   the same model for GitLab CI, CircleCI and the like) from the default branch,
   not from a stale checkout. Fetch first and record the commit. If the local
   branch is ahead and changes the workflow, read both versions and offer a switch
@@ -28,9 +28,10 @@ DATA
 - If the pipeline has a quality or release gate that reads reports from other
   jobs, find which report files it expects by reading the gate's own source at
   the same commit, with its weights and thresholds. Do not copy them from
-  memory or from docs. Map each artifact to the gate input it carries: a
-  single-file upload by the report's file name, a directory upload by the
-  artifact being named after the input.
+  memory or from docs. Map each artifact to the gate input it carries by
+  tracing it end to end: the upload's artifact name and paths, then each
+  download's `name`, `pattern` and `path`, to the files the gate reads. Don't
+  assume an artifact is named after its report file or its gate input.
 - Flag every artifact that is uploaded and never downloaded, and every gate
   input that nothing uploads. Expect to find one: a scan job whose report
   nothing reads is a common silent gap.
@@ -39,14 +40,14 @@ DATA
 - Timings: from the last ~20 completed runs on the default branch, median and p90
   per job and per step, and the failure rate per job (failures over runs that
   finished it, pass or fail). For example:
-  - GitHub Actions: `gh run list --branch main --status completed --limit 20
-    --json databaseId,headSha,conclusion`, then for each run
+  - GitHub Actions: `gh run list --branch <default-branch> --status completed
+    --limit 20 --json databaseId,headSha,conclusion`, then for each run
     `gh api repos/{owner}/{repo}/actions/runs/<id>/jobs`, whose steps carry
     their own timestamps
-  - GitLab CI: `GET /projects/:id/pipelines?ref=main`, then
+  - GitLab CI: `GET /projects/:id/pipelines?ref=<default-branch>`, then
     `GET /projects/:id/pipelines/:pipeline_id/jobs` (job durations only; step
-    timings have to come from the job log's section markers) Keep "Set up job" and the post steps apart from the workflow's
-  steps. Match API steps to workflow steps by name and, for repeated names
+    timings have to come from the job log's section markers)
+  Keep "Set up job" and the post steps apart from the workflow's steps. Match API steps to workflow steps by name and, for repeated names
   (several download-artifact steps), by position among those. Say how many of
   those runs used the current workflow file; older runs ran older definitions.
   Before blaming a rule for cancelled runs, check that it existed then.
@@ -61,8 +62,8 @@ LAYERS (columns, left to right)
 
 COLOR
 - Encode what a job's failure does. Breaks the build: solid critical border.
-  continue-on-error (costs points in the gate, does not fail the run): dashed
-  warning border. The gate: thick accent border. Jobs that hold a deployment
+  continue-on-error (does not fail the run; it costs gate points only if the
+  gate's inputs and weights charge for it): dashed warning border. The gate: thick accent border. Jobs that hold a deployment
   environment or `contents: write`: a lock badge.
 - Fill by stage. Edges: needs in neutral grey, artifact flow in the accent,
   unconsumed artifacts in critical.
@@ -98,10 +99,15 @@ INTERACTION
   - An `if:` with no status function gets an implicit `success()`, so a failed,
     cancelled or skipped need skips the job.
   - `always()` runs the job regardless.
-  - A cancelled job still runs its `if: always()` steps, but its report was
-    never written, so the upload is empty.
+  - A cancelled job still runs its `if: always()` steps. Its report may or may
+    not have been written before the cancel: check whether the expected file
+    gets uploaded, and mark the gate input missing only when it doesn't.
   - A failed job leaves a report only if its tool writes one before exiting
     non-zero. Check each tool's exit behaviour.
+  - With `fail-fast` (on by default), a shard that fails without
+    continue-on-error cancels its queued and running siblings. Mark them
+    cancelled before working out what runs, which artifacts exist and what the
+    gate sees.
   - Matrix results aggregate: failure beats cancelled beats skipped.
   - A missing gate input is a blocker. A report from a failed producer is
     charged, and it blocks only if even the smallest charge exceeds the gate's

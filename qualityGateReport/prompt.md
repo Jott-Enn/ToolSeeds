@@ -16,14 +16,18 @@ DATA
   detail, points).
 - Inputs that need pipeline evidence (coverage, mutation, acceptance runs,
   flakiness, DAST, SAST, dependency CVEs) come from reports that are usually
-  missing or stale locally. Pull them from the latest successful CI run on the
-  default branch, into the paths the gate reads, and run any merge steps CI runs
-  (e.g. sharded reports) before scoring. For example:
-  - GitHub Actions: `gh run list --branch main --status success --limit 1`, then
-    `gh run download <run-id> -n coverage -D coverage/`
-  - GitLab CI: `glab ci artifact main <job-name>`, or
-    `GET /projects/:id/jobs/artifacts/main/download?job=<job-name>`
-  - Jenkins: `<job-url>/lastSuccessfulBuild/artifact/<path>`
+  missing or stale locally. Pull them from a successful CI run on the
+  default-branch commit being scored (the run's head SHA must match), into the
+  paths the gate reads, and run any merge steps CI runs (e.g. sharded reports)
+  before scoring. If no run for that commit has the artifact, leave the input
+  missing and say the latest evidence is stale; never score older commits'
+  evidence. For example:
+  - GitHub Actions: `gh run list --commit <sha> --status success --json
+    databaseId,headSha`, then `gh run download <run-id> -n coverage -D coverage/`
+  - GitLab CI: `GET /projects/:id/pipelines?sha=<sha>&status=success`, then
+    `GET /projects/:id/jobs/<job-id>/artifacts`
+  - Jenkins: `<job-url>/<build-number>/artifact/<path>`, for the build whose
+    recorded revision is that commit
   - CircleCI: `GET /project/:slug/<build-number>/artifacts`, then each artifact's
     `url`
   Record the run or pipeline ID for each artifact.
