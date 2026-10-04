@@ -42,10 +42,16 @@ DATA
   finished it, pass or fail). For example:
   - GitHub Actions: `gh run list --branch <default-branch> --status completed
     --limit 20 --json databaseId,headSha,conclusion`, then for each run
-    `gh api repos/{owner}/{repo}/actions/runs/<id>/jobs`, whose steps carry
-    their own timestamps
+    `gh api --paginate --slurp
+    'repos/{owner}/{repo}/actions/runs/<id>/jobs?per_page=100'`, whose steps
+    carry their own timestamps. The endpoint returns 30 jobs per page by
+    default and `gh api` fetches later pages only with `--paginate`; `--slurp`
+    wraps the pages in an array, so aggregate them (e.g.
+    `jq '[.[].jobs[]]'`) before computing timings or failure rates, or runs
+    with many jobs (matrix shards) silently lose some
   - GitLab CI: `GET /projects/:id/pipelines?ref=<default-branch>`, then
-    `GET /projects/:id/pipelines/:pipeline_id/jobs` (job durations only; step
+    `GET /projects/:id/pipelines/:pipeline_id/jobs?per_page=100`, following
+    every page (`glab api --paginate`) (job durations only; step
     timings have to come from the job log's section markers)
   Keep "Set up job" and the post steps apart from the workflow's steps. Match API steps to workflow steps by name and, for repeated names
   (several download-artifact steps), by position among those. Say how many of
