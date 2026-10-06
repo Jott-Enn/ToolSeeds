@@ -10,7 +10,8 @@ A tool seed describes a tool's purpose and expected behavior so an assistant can
 2. [dependencyMap](dependencyMap/prompt.md): building blocks in layer bands and area regions, resolved through the compiler, with coupling and instability per block, cycles, layering violations and a free body diagram of the selected block. Published as an artifact.
 3. [pipelineAnatomy](pipelineAnatomy/prompt.md): the CI/CD pipeline as a left-to-right DAG of jobs, needs and artifact flow, with median/p90 timings, the critical path, and a what-if that shows which jobs still run and what the release gate decides when one fails, is skipped or is cancelled. Published as an artifact.
 4. [qualityGateReport](qualityGateReport/prompt.md): the project's own quality-gate score explained: verdict, budget bar, every finding, the complexity distribution and code growth over time, with a what-if that excludes findings but never missing evidence. Published as an artifact.
-5. [promptToDeterministicTool](promptToDeterministicTool/prompt.md): turns any seed above into a tool committed to the project, with a pure core, cached network data, precomputed layouts and what-ifs, and the seed's VERIFY steps as tests, so one command produces the same artifact every time.
+5. [featureParity](featureParity/prompt.md): a feature-by-client matrix for projects with several apps, SDKs or bots, where every cell is decided by an explicit rule and backed by file:line evidence traced through the shared cores, with imported parity audits diffed against the code, cross-client rollouts from history, and a what-if that shows which clients inherit a core change. Published as an artifact.
+6. [promptToDeterministicTool](promptToDeterministicTool/prompt.md): turns any seed above into a tool committed to the project, with a pure core, cached network data, precomputed layouts and what-ifs, and the seed's VERIFY steps as tests, so one command produces the same artifact every time.
 
 ## Using a tool
 
