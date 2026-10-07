@@ -45,6 +45,11 @@ DATA
   complexity or rust-code-analysis for Rust, lizard as the fallback for
   anything else. Say which tool and which metric (cyclomatic, cognitive,
   ABC/flog).
+- Use one metric per plot. Cyclomatic, cognitive and flog scores sit on
+  different scales, so in a polyglot repository either pick a metric every
+  language's tool reports (cyclomatic is the common one) or give each
+  metric its own plot, thresholds and ranking. Never put unlike raw scores
+  on one axis.
 - Check the tool before trusting it: compare the number of functions it
   reports per file with the number the language declares, and look at the
   three longest functions' scores. Lightweight parsers can lose function
@@ -60,19 +65,24 @@ DATA
   one file.
 
 QUADRANTS
-- Split each axis at a stated threshold (default: median, on a log scale
-  because churn is heavy-tailed) and name the quadrants:
+- Both axes use `log1p` (log(1 + value)), so files with zero churn or zero
+  complexity still plot, at the origin. Points, thresholds, zoom and the
+  ranking all use the same transform; tick labels show the raw values.
+- Split each axis at a stated threshold (default: the median of the raw
+  values, drawn through the same transform) and name the quadrants:
   - upper right, Danger Zone: complex and changes often. Refactor here first.
   - lower left, Healthy Closure: simple and stable. Leave it alone.
   - upper left, Cowboy Code: complex but rarely touched. Watch it.
   - lower right, Fertile Ground: simple but changing often, often config
     or a new abstraction that hasn't been extracted yet.
-- Rank Danger Zone files by distance from the origin in normalized log
-  space, and show the top ten as a list.
+- Rank Danger Zone files by score = sqrt(u² + v²), where u = log1p(churn) /
+  log1p(max churn) and v = log1p(complexity) / log1p(max complexity), both
+  over the files in view, highest first. Show the top ten as a list and say
+  the formula on the page.
 
 LAYOUT
-- Scatter plot: x = churn, y = complexity, both log scale, with the
-  threshold lines and quadrant names drawn faint behind the points. One
+- Scatter plot: x = churn, y = complexity, both on the `log1p` scale, with
+  the threshold lines and quadrant names drawn faint behind the points. One
   point per file, coloured by top-level directory (validate the palette for
   colourblind separation in light and dark), sized by lines of code.
 - Label the top ten without overlap. Fit to the viewport; scroll to zoom,
