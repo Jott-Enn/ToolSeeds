@@ -52,6 +52,10 @@ CAPTURE
   track). A DOM rasterizer (html2canvas and the like) re-renders the page
   and gets canvases, video, fonts and filters wrong, which is the wrong kind
   of answer for a tool whose purpose is "this is exactly what I saw".
+- preferCurrentTab only suggests this tab; I can still pick another tab,
+  window or screen. Check the track's displaySurface before using the
+  frame, and if it isn't this tab, say so in the annotation view and offer
+  retry and cancel. Record the surface in the sidecar.
 - Capture first, then open the annotation view. Opening the view first makes
   the capture photograph the view itself. Make capture() refuse to run while
   the view is visible, and keep that guard under test.
@@ -110,7 +114,9 @@ WHAT PRODUCED IT
     settles on once the action's request has returned, committed input and
     select changes with their value, one entry per zoom or drag gesture),
     with millisecond timestamps, mirrored to local storage so a crash
-    doesn't lose it. The state says where the program stood; the journal
+    doesn't lose it. Never record the value of a password field or of a
+    field the application marks as sensitive; record that it changed. The
+    state says where the program stood; the journal
     says how it got there, which is usually what the diagnosis needs.
 - Resolve each mark to what lies under it. At filing, ask the application's
   own model (hit-testing, scene graph, the layout it computed) which domain
@@ -123,6 +129,9 @@ WHAT PRODUCED IT
   explanations from the program's own explanation API where it has one; if
   you recompute them, say so, because a copy can drift from the real rule.
   Say which kinds of marks resolve and which don't.
+- If the state can hold secrets or personal data (credentials, tokens,
+  customer records), filter it through an allowlist of fields before it
+  reaches the sidecar, and say what was left out.
 - None of this enters saves, exports or the produced work. Raise the
   server's request-size limit for filing if the image and state need it.
 
@@ -220,7 +229,8 @@ VERIFY
   --auto-select-desktop-capture-source and, for tab capture,
   --auto-accept-this-tab-capture), draw three marks in two colours, one of
   them around a single produced object, type a note, file it. Then check
-  that exactly three new files exist, that the PNG shows the application
+  that exactly three new files carry the new stem and that index.md and
+  index.json were regenerated, that the PNG shows the application
   and not the annotation view (compare it with a screenshot taken just
   before the press), that the sidecar's marks match what was drawn and
   their number badges appear in the image, that the mark around the object
